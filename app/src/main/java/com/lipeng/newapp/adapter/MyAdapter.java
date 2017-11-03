@@ -26,7 +26,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
     private Context mContext;
 
     public MyAdapter(Context context, List<News> news){
-        System.out.println("----------------context = [" + context + "], news = [" + news.size() + "]");
         mNews = news;
         this.mContext = context;
     }
@@ -34,6 +33,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
     //用于回调，响应RecyclerView item的点击事件
     public  interface OnItemClickListener{
         void onItemClick(View view, News position);
+    }
+
+    //加载数据，并更新视图
+    public void addData(List<News> data){
+        mNews.addAll(data);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -60,7 +65,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
 
     @Override
     public int getItemCount() {
-        System.out.println("----------------MyAdapter.getItemCount"  + mNews.size());
         return mNews.size();
     }
 

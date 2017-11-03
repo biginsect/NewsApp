@@ -1,5 +1,6 @@
 package com.lipeng.newapp.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -20,6 +21,10 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.lipeng.newapp.utils.NetworkUtil.ResponseResult;
 
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 /**
@@ -37,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements ResponseResult{
 
     private News mNews;
     private int mNewsId;
+    private List<News> mNewsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,35 +63,43 @@ public class MainActivity extends AppCompatActivity implements ResponseResult{
         mDatabase = NewsDatabase.getInstance(this);
         //请求数据,完成后将数据存储到数据库中
         NetworkUtil.getContentFromURL(mDatabase, NetworkUtil.NEWS_URL, this); // 1s
+        //在主线程进行数据库读取操作，会阻塞主线程
+        mAdapter = new MyAdapter(MainActivity.this.getApplicationContext(), mNewsList); // 0.0001s
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        //保持RecyclerView固定的大小
+        mRecyclerView.setHasFixedSize(true);
+
+//        Log.d(TAG, "mNews size is " + mNewsList.size());
+        mRecyclerView.setAdapter(mAdapter);
+
+        mAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, News position) {
+                //点击启动详情页面
+                mNews = position;
+                //获取news 的id，添加到url中，跳转到对应的详情页面
+                mNewsId = mNews.getNewsId();
+                Log.d(TAG, mNewsId + "");
+                //使用Intent完成activity之间的跳转
+                Intent intent = new Intent(MainActivity.this.getApplicationContext(), WebViewActivity.class);
+                intent.putExtra("address",NetworkUtil.URL_HAS_NOT_ID + mNewsId);
+                startActivity(intent);
+            }
+        });
     }
 
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            //从数据库中加载数据
+//            mNewsList.addAll(mDatabase.loadNews());
+            //数据请求完成 通知adapter更新视图
+//            mAdapter.notifyDataSetChanged();
 
-            mAdapter = new MyAdapter(MainActivity.this, mDatabase.loadNews()); // 0.0001s
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-            //保持RecyclerView固定的大小
-            mRecyclerView.setHasFixedSize(true);
+            //为保证职责单一原则，需要让adapter自行加载数据并更新视图
+            mAdapter.addData(mDatabase.loadNews());
 
-//        Log.d(TAG, "mNews size is " + mNewsList.size());
-            mRecyclerView.setAdapter(mAdapter);
-
-            mAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, News position) {
-                    //点击启动详情页面
-                    mNews = position;
-                    //获取news 的id，添加到url中，跳转到对应的详情页面
-                    mNewsId = mNews.getNewsId();
-                    Log.d(TAG, mNewsId + "");
-                    //使用Intent完成activity之间的跳转
-                    Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                    intent.putExtra("address",NetworkUtil.URL_HAS_NOT_ID + mNewsId);
-                    startActivity(intent);
-                }
-            });
         }
     };
 
