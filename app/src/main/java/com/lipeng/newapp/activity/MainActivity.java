@@ -1,6 +1,8 @@
 package com.lipeng.newapp.activity;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,9 +17,8 @@ import com.lipeng.newapp.database.NewsDatabase;
 import com.lipeng.newapp.bean.News;
 import com.lipeng.newapp.utils.NetworkUtil;
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.lipeng.newapp.utils.NetworkUtil.ResponseResult;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,11 +28,10 @@ import butterknife.ButterKnife;
  * 第一次url请求得到的是image的url，需要再次请求才能得到图片
  * */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ResponseResult{
     private final static String TAG = "MainActivity";
     @BindView(R.id.rv_news) RecyclerView mRecyclerView;
 
-    private List<News> mNewsList;
     private MyAdapter mAdapter;
     private NewsDatabase mDatabase;
 
@@ -54,33 +54,43 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Fresco.initialize(this);
         //存放news的List
-        mNewsList = new ArrayList<>();
         mDatabase = NewsDatabase.getInstance(this);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        //保持RecyclerView固定的大小
-        mRecyclerView.setHasFixedSize(true);
         //请求数据,完成后将数据存储到数据库中
-        NetworkUtil.getContentFromURL(mDatabase, NetworkUtil.NEWS_URL);
-        mNewsList = mDatabase.loadNews();
-        mAdapter = new MyAdapter(this, mNewsList);
-
-//        Log.d(TAG, "mNews size is " + mNewsList.size());
-        mRecyclerView.setAdapter(mAdapter);
-
-        mAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, News position) {
-                //点击启动详情页面
-                mNews = position;
-                //获取news 的id，添加到url中，跳转到对应的详情页面
-                mNewsId = mNews.getNewsId();
-                Log.d(TAG, mNewsId + "");
-                //使用Intent完成activity之间的跳转
-                Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                intent.putExtra("address",NetworkUtil.URL_HAS_NOT_ID + mNewsId);
-                startActivity(intent);
-            }
-        });
+        NetworkUtil.getContentFromURL(mDatabase, NetworkUtil.NEWS_URL, this); // 1s
     }
 
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            mAdapter = new MyAdapter(MainActivity.this, mDatabase.loadNews()); // 0.0001s
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+            //保持RecyclerView固定的大小
+            mRecyclerView.setHasFixedSize(true);
+
+//        Log.d(TAG, "mNews size is " + mNewsList.size());
+            mRecyclerView.setAdapter(mAdapter);
+
+            mAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, News position) {
+                    //点击启动详情页面
+                    mNews = position;
+                    //获取news 的id，添加到url中，跳转到对应的详情页面
+                    mNewsId = mNews.getNewsId();
+                    Log.d(TAG, mNewsId + "");
+                    //使用Intent完成activity之间的跳转
+                    Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                    intent.putExtra("address",NetworkUtil.URL_HAS_NOT_ID + mNewsId);
+                    startActivity(intent);
+                }
+            });
+        }
+    };
+
+    @Override
+    public void response() {
+        handler.sendEmptyMessage(0);
+    }
 }

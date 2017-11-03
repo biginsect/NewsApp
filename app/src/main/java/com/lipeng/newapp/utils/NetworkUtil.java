@@ -20,7 +20,7 @@ import okhttp3.Response;
 
 /**
  * Created by lipeng-ds3 on 2017/10/28.
- *
+ * <p>
  * 网络请求的工具类，主要用于发起同步或异步的网络请求
  */
 
@@ -38,9 +38,11 @@ public final class NetworkUtil {
 
     /**
      * 方法主要用于请求{@link #NEWS_URL}的数据
+     *
      * @param database 数据库操作实例，用于调用数据库的新闻存储方法{@link NewsDatabase#saveNews(News)}
-     * @param url 请求的url*/
-    public static void getContentFromURL(final NewsDatabase database, String url){
+     * @param url      请求的url
+     */
+    public static void getContentFromURL(final NewsDatabase database, String url, final ResponseResult responseResult) {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -56,15 +58,21 @@ public final class NetworkUtil {
                 if (!response.isSuccessful())
                     throw new IOException("Unexpected code " + response.code());
                 ResolveResponseUseJson.handleResponse(database, response.body().string());
+                responseResult.response();
             }
         });
+    }
+
+    public interface ResponseResult {
+
+        void response();
     }
 
     /**
      * 从{@link com.lipeng.newapp.activity.MainActivity }跳转到WebView的时候，传入一个当前item对应的url
      * 请求当前url的详情内容，完成之后直接保存html代码以及css代码
-     * */
-    public static void loadWebViewFromURL(final Context context,String url){
+     */
+    public static void loadWebViewFromURL(final Context context, String url) {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -76,7 +84,7 @@ public final class NetworkUtil {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     String[] code = ResolveResponseUseJson.handleWebViewResponse(response.body().string());
                     saveWebViewCode(context, code);
                 }
@@ -85,7 +93,7 @@ public final class NetworkUtil {
     }
 
     //根据new对应id去请求content并返回
-    public static String getContentFromURLAndId(String url,final int id){
+    public static String getContentFromURLAndId(String url, final int id) {
         Request request = new Request.Builder()
                 .url(url + id)
                 .build();
@@ -93,7 +101,7 @@ public final class NetworkUtil {
             Response response = client.newCall(request).execute();
             if (response.isSuccessful())
                 return response.body().string();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -101,14 +109,14 @@ public final class NetworkUtil {
 
     /**
      * 使用SharedPreferences 存储html代码和css代码
-     * */
-    public synchronized static void saveWebViewCode(Context context, String[] code){
-        if (code.length > 1){
+     */
+    public synchronized static void saveWebViewCode(Context context, String[] code) {
+        if (code.length > 1) {
             SharedPreferences htmlPreferences = context.getSharedPreferences("html", Context.MODE_PRIVATE);
             SharedPreferences.Editor htmlEditor = htmlPreferences.edit();
             //富文本设置
 //            String richCodeSetting = "<head><style>img{max-width:100% !important;} table{max-width:100% !important;}</style></head>";
-            htmlEditor.putString("html",code[0] );
+            htmlEditor.putString("html", code[0]);
             htmlEditor.apply();
 
             SharedPreferences cssPreferences = context.getSharedPreferences("css.css", Context.MODE_PRIVATE);
@@ -119,12 +127,12 @@ public final class NetworkUtil {
     }
 
     //检查网络状态，标准写法
-    public static boolean isNetworkAvailable(Activity activity){
+    public static boolean isNetworkAvailable(Activity activity) {
         Context context = activity.getApplicationContext();
-        ConnectivityManager manager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (manager == null){
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (manager == null) {
             return false;
-        }else {
+        } else {
             NetworkInfo info = manager.getActiveNetworkInfo();
             if (info.getState() == NetworkInfo.State.CONNECTED)
                 return true;

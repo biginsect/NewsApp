@@ -3,6 +3,7 @@ package com.lipeng.newapp.adapter;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +21,12 @@ import java.util.List;
  */
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> implements View.OnClickListener{
-    private List<News> mNews;
+    private List<News> mNews = null;
     private OnItemClickListener mOnItemClickListener = null;
     private Context mContext;
 
     public MyAdapter(Context context, List<News> news){
+        System.out.println("----------------context = [" + context + "], news = [" + news.size() + "]");
         mNews = news;
         this.mContext = context;
     }
@@ -36,6 +38,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Log.d("MyAdapter","-------------onCreateViewHolder");
         View view = LayoutInflater.from(mContext)
                 .inflate(R.layout.news_rv_item, parent, false);
         view.setOnClickListener(this);
@@ -45,6 +48,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
+        Log.d("MyAdapter","-------------onBindViewHolder");
         News news = mNews.get(position);
         holder.newsTitle.setText(news.getNewsTitle());
         holder.newsContent.setText(news.getNewsContent());
@@ -56,6 +60,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
 
     @Override
     public int getItemCount() {
+        System.out.println("----------------MyAdapter.getItemCount"  + mNews.size());
         return mNews.size();
     }
 

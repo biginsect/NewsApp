@@ -56,7 +56,7 @@ public final class NewsDatabase {
         }
     }
 
-    //从数据库读取内容并存放到List中
+    // 从数据库读取内容并存放到List中
     public List<News> loadNews(){
         List<News> newsList = new ArrayList<>();
         Cursor cursor = mDatabase.query("news", null, null, null, null, null, null);
