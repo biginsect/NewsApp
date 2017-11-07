@@ -10,25 +10,21 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lipeng.myapplication.R;
 import com.lipeng.newapp.adapter.MyAdapter;
-import com.lipeng.newapp.adapter.TopStoriesAdapter;
 import com.lipeng.newapp.bean.TopStories;
 import com.lipeng.newapp.database.NewsDatabase;
 import com.lipeng.newapp.bean.News;
+import com.lipeng.newapp.utils.MyImageLoader;
 import com.lipeng.newapp.utils.NetworkUtil;
 import com.lipeng.newapp.utils.NetworkUtil.RequestCompleteCallBack;
+import com.youth.banner.Banner;
 
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
     private final static int MESSAGE_CODE = 0x101;
     private final static String TAG = "MainActivity";
     @BindView(R.id.rv_news) RecyclerView mRecyclerView;
+    @BindView(R.id.banner_top_stories)  Banner mBanner;
 
     private MyAdapter mRecyclerAdapter;
     private NewsDatabase mDatabase;
@@ -49,17 +46,6 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
     private News mNews;
     private int mNewsId;
     private List<News> mNewsList = new ArrayList<>();
-
-    /************轮播图所需内容**********/
-    @BindView(R.id.vp_top_stories) ViewPager mViewPage;
-    @BindView(R.id.top_stories_selector)  RadioGroup groupSeletor;
-    @BindView(R.id.tv_top_stories_title)  TextView topStoriesTitle;
-    private TopStoriesAdapter mTopAdapter;
-    private List<TopStories> mStoriesList = new ArrayList<>();
-    //当前轮播页面
-    private static int currentItem = 0;
-    //是否启用自动轮播
-    private ScheduledExecutorService service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,14 +68,12 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
         NetworkUtil.getContentFromURL(mDatabase, NetworkUtil.NEWS_URL, this); // 1s
         //在主线程进行数据库读取操作，会阻塞主线程
         mRecyclerAdapter = new MyAdapter(MainActivity.this.getApplicationContext(), mNewsList); // 0.0001s
-        mTopAdapter = new TopStoriesAdapter(MainActivity.this, mStoriesList);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         //保持RecyclerView固定的大小
         mRecyclerView.setHasFixedSize(true);
 
 //        Log.d(TAG, "mNews size is " + mNewsList.size());
         mRecyclerView.setAdapter(mRecyclerAdapter);
-        mViewPage.setAdapter(mTopAdapter);
 
         mRecyclerAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
             @Override
@@ -119,55 +103,38 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
             if(msg.what == MESSAGE_CODE){
                 //为保证职责单一原则，需要让adapter自行加载数据并更新视图
                 mRecyclerAdapter.addData(mDatabase.loadNews());
-                mTopAdapter.addData(mDatabase.loadStories());
-                Log.d(TAG, "----------------2222--22----" + mDatabase.loadStories().size());
+                List<String> tmpImageUrls = new ArrayList<>();
+                List<String> tmpTitles = new ArrayList<>();
+                List<TopStories> storiesList = mDatabase.loadStories();
+                for (int i = 0; i < storiesList.size(); i++){
+                    tmpImageUrls.add(storiesList.get(i).getStoryImageUrl());
+                    Log.d(TAG, "---------" + storiesList.get(i).getStoryImageUrl());
+                    tmpTitles.add(storiesList.get(i).getStoryTitle());
+                }
+
+                mBanner.setImageLoader(new MyImageLoader())
+                        .setImages(tmpImageUrls)
+                        .setBannerTitles(tmpTitles)
+                        .start();
             }
         }
     };
+
 
     @Override
     public void response() {
         handler.sendEmptyMessage(MESSAGE_CODE);
     }
 
-    private void startAutoScroll(){
-        stopAutoScroll();
-        service = Executors.newSingleThreadScheduledExecutor();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                selectNextItem();
-            }
-
-            private void selectNextItem(){
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mViewPage.setCurrentItem(++ currentItem);
-                    }
-                });
-            }
-        };
-        int delay = 2;
-        int period = 2;
-        TimeUnit unit = TimeUnit.SECONDS;
-        service.scheduleAtFixedRate(runnable, delay, period, unit);
-    }
-
-    private void stopAutoScroll(){
-        if (service != null)
-            service.shutdownNow();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mBanner.startAutoPlay();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        startAutoScroll();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopAutoScroll();
+    protected void onStop() {
+        super.onStop();
+        mBanner.stopAutoPlay();
     }
 }
