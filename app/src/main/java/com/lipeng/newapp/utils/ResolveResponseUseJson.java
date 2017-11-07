@@ -2,6 +2,7 @@ package com.lipeng.newapp.utils;
 
 import android.util.Log;
 
+import com.lipeng.newapp.bean.TopStories;
 import com.lipeng.newapp.database.NewsDatabase;
 import com.lipeng.newapp.bean.News;
 
@@ -22,7 +23,7 @@ public final class ResolveResponseUseJson {
      * 服务器返回的是两个键值对类型数据stories 和top_stories
      * 需要分开处理
      * */
-    public synchronized static void handleResponse(NewsDatabase dataBase, String response){
+    public synchronized static void handleResponse(NewsDatabase database, String response){
         if (response == null){
             Log.d(TAG, " handleResponse: response is null");
             return;
@@ -35,25 +36,44 @@ public final class ResolveResponseUseJson {
                 stories[i] = jsonArrayStories.getString(i);
             }
             //解析完成，将子项分开并存放到数据库中
-            handleJSONArray(dataBase, stories);
+            handleJSONArray(database, stories);
+            //处理轮播图TopStories
+            JSONArray jsonArrayTopStories = jsonObject.getJSONArray("top_stories");
+            String[] topStories = new String[jsonArrayTopStories.length()];
+            for (int i = 0; i < topStories.length; i++){
+                topStories[i] = jsonArrayTopStories.getString(i);
+            }
 
+            handleJSONArrayTopStories(database, topStories);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
+
+/*
+    //处理轮播图TopStories
+    public synchronized static void handleTopStoriesResponse(NewsDatabase database, String response){
+
+       if (response == null)
+           return;
+        try{
+            JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArrayTopStories = jsonObject.getJSONArray("top_stories");
             String[] topStories = new String[jsonArrayTopStories.length()];
             for (int i = 0; i < topStories.length; i++){
                 topStories[i] = jsonArrayTopStories.getString(i);
             }
             ////解析完成，将子项分开并存放到数据库中
-            handleJSONArrayTopStories(dataBase, topStories);
+            handleJSONArrayTopStories(database, topStories);
         }catch (JSONException e){
             e.printStackTrace();
         }
     }
+*/
 
     /**
      * {@link #handleResponse(NewsDatabase, String)}返回两种数据，stories和top_stories
      * 由于stories 返回的图片url对于的键是images 而top_stories 返回的是image，需要进行不同的处理
-     * 当前方法处理的是stories返回的数据
-     * {@link #handleJSONArrayTopStories(NewsDatabase, String[])}处理top_stories返回的数据
      * 处理完成立即存储到数据库中
      * */
     public synchronized static void handleJSONArray(NewsDatabase dataBase, String[] arr){
@@ -85,18 +105,16 @@ public final class ResolveResponseUseJson {
         int i = 0;
         while (i != arr.length){
             try{
-                News news = new News();
+                TopStories stories = new TopStories();
                 JSONObject jsonObject = new JSONObject(arr[i]);
-                String newsImageUrl = jsonObject.getString("image");
-                String newsId = jsonObject.getString("id");
-                String newsTitle = jsonObject.getString("title");
-                String newsContent = NetworkUtil.getContentFromURLAndId(NetworkUtil.URL_HAS_NOT_ID, Integer.parseInt(newsId));
-                news.setNewsImageUrl(newsImageUrl);
-                news.setNewsId(Integer.parseInt(newsId));
-                news.setNewsTitle(newsTitle);
-                news.setNewsContent(newsContent);
+                String imageUrl = jsonObject.getString("image");
+                String id = jsonObject.getString("id");
+                String title = jsonObject.getString("title");
+                stories.setStoryImageUrl(imageUrl);
+                stories.setStoryId(Integer.parseInt(id));
+                stories.setStoryTitle(title);
 //                Log.d(TAG, "newsImageUrl "+ newsImageUrl + "\n" + "newsId" + newsId);
-                dataBase.saveNews(news);
+                dataBase.saveStories(stories);
             }catch (JSONException e){
                 e.printStackTrace();
             }

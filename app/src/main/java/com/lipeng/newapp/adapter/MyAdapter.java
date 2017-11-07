@@ -38,6 +38,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
     //加载数据，并更新视图
     public void addData(List<News> data){
         mNews.addAll(data);
+        //在进行视图更新的时候需要保证数据已经获取，否则此方法达不到效果
         notifyDataSetChanged();
     }
 

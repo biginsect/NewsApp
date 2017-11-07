@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.lipeng.newapp.bean.News;
+import com.lipeng.newapp.bean.TopStories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
  * {@link News}对应的数据库操作类，主要有数据的存储方法{@link #saveNews(News)}和数据的读取方法{@link #loadNews()}
  */
 
-public final class NewsDatabase {
+public  class NewsDatabase {
     private static final String TAG = "NewsDatabase";
 
     //数据库名字
@@ -75,6 +76,33 @@ public final class NewsDatabase {
         if (cursor != null)
                 cursor.close();
         return newsList;
+    }
+
+    //存储到数据库中
+    public void saveStories(TopStories stories){
+        if (stories != null){
+            ContentValues values = new ContentValues();
+            values.put("id", stories.getStoryId());
+            values.put("title", stories.getStoryTitle());
+            values.put("imageUrl", stories.getStoryImageUrl());
+            mDatabase.insertWithOnConflict("top_stories", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+    }
+
+    //从数据库中读取存储的内容
+    public List<TopStories> loadStories(){
+        List<TopStories> storiesList = new ArrayList<>();
+        Cursor cursor = mDatabase.query("top_stories", null, null, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+            TopStories stories = new TopStories();
+            stories.setStoryId(cursor.getInt(cursor.getColumnIndex("id")));
+            stories.setStoryImageUrl(cursor.getString(cursor.getColumnIndex("imageUrl")));
+            stories.setStoryTitle(cursor.getString(cursor.getColumnIndex("title")));
+            storiesList.add(stories);
+        }
+        cursor.close();
+
+        return storiesList;
     }
 
 }

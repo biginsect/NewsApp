@@ -20,6 +20,10 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
             "imageUrl text," +
             "title text," +
             "content text)";
+    private static final String CREATE_TOP_STORIES = "create table top_stories(" +
+            "id integer primary key," +
+            "imageUrl text," +
+            "title text)";
 
     public MyDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
@@ -29,6 +33,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {//第一次调用getWritableDatabase() 或者getReadableDatabase()执行该方法
         db.execSQL(CREATE_USER);
         db.execSQL(CREATE_NEWS);
+        db.execSQL(CREATE_TOP_STORIES);
         //创建完user立即插入数据
         db.execSQL("insert into user (account, password) values(?, ?)",new String[]{"lipeng-ds3", "123"});
         //db.execSQL("insert into user (account, password) values(?, ?)",new String[]{"lipeng", "123"});

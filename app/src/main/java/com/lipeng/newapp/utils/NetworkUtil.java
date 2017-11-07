@@ -42,7 +42,7 @@ public final class NetworkUtil {
      * @param database 数据库操作实例，用于调用数据库的新闻存储方法{@link NewsDatabase#saveNews(News)}
      * @param url      请求的url
      */
-    public static void getContentFromURL(final NewsDatabase database, String url, final ResponseResult responseResult) {
+    public static void getContentFromURL(final NewsDatabase database, String url, final RequestCompleteCallBack callBack) {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -57,13 +57,33 @@ public final class NetworkUtil {
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful())
                     throw new IOException("Unexpected code " + response.code());
-                ResolveResponseUseJson.handleResponse(database, response.body().string());
-                responseResult.response();
+                ResolveResponseUseJson.handleResponse( database, response.body().string());
+                callBack.response();
             }
         });
     }
 
-    public interface ResponseResult {
+    /*public static void getTopStoriesFromURL(final TopStoriesDatabase database, String url, final RequestTopStoriesCompleteCallBack callBack){
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                ResolveResponseUseJson.handleTopStoriesResponse(database, response.body().string());
+                callBack.response();
+            }
+        });
+    }*/
+
+
+    //请求完成，通知主线程可以从数据库读取数据
+    public interface RequestCompleteCallBack {
 
         void response();
     }
