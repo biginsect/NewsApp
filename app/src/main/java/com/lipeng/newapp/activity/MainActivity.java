@@ -3,7 +3,6 @@ package com.lipeng.newapp.activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -103,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
             if(msg.what == MESSAGE_CODE){
                 //为保证职责单一原则，需要让adapter自行加载数据并更新视图
                 mRecyclerAdapter.addData(mDatabase.loadNews());
+                //header 轮播图内容设置
                 List<String> tmpImageUrls = new ArrayList<>();
                 List<String> tmpTitles = new ArrayList<>();
                 List<TopStories> storiesList = mDatabase.loadStories();
@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
                     tmpTitles.add(storiesList.get(i).getStoryTitle());
                 }
 
+                //轮播图配置images的url title等等
                 mBanner.setImageLoader(new MyImageLoader())
                         .setImages(tmpImageUrls)
                         .setBannerTitles(tmpTitles)
