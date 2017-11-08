@@ -106,7 +106,8 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
                 List<String> tmpImageUrls = new ArrayList<>();
                 List<String> tmpTitles = new ArrayList<>();
                 List<TopStories> storiesList = mDatabase.loadStories();
-                for (int i = 0; i < storiesList.size(); i++){
+                //限制只放入五张轮播图
+                for (int i = storiesList.size() - 1; i >= 0 && i != storiesList.size() - 6; i--){
                     tmpImageUrls.add(storiesList.get(i).getStoryImageUrl());
                     Log.d(TAG, "---------" + storiesList.get(i).getStoryImageUrl());
                     tmpTitles.add(storiesList.get(i).getStoryTitle());
