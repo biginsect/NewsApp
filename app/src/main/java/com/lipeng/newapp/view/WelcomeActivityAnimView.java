@@ -14,7 +14,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
 import android.view.animation.BounceInterpolator;
+import android.view.animation.ScaleAnimation;
 
 import com.lipeng.newapp.view.evaluator.PointEvaluator;
 
@@ -49,8 +51,11 @@ public class WelcomeActivityAnimView extends View{
                 drawCircle(canvas);
             }
         }else {
+            //求出屏幕对角线的长度
+            float radius = getWidth()*getWidth()+getHeight()*getHeight();
             //重新绘制
-            canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), 200,mPaint);
+            canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), 100,mPaint);
+//            startScaleAnimation();
         }
     }
 
@@ -60,8 +65,18 @@ public class WelcomeActivityAnimView extends View{
         canvas.drawCircle(x, y, RADIUS, mPaint);
     }
 
+    public void startScaleAnimation(){//缩放动画
+        ScaleAnimation animation = new ScaleAnimation(RADIUS, 50f, RADIUS, 50f, Animation.RELATIVE_TO_SELF,
+                0.5f,Animation.RELATIVE_TO_SELF, 0.5f);
+        animation.setDuration(1000);
+        animation.setFillAfter(true);
+        this.setAnimation(animation);
+        Log.d("111111111111111111","         -----");
+        startAnimation(animation);
+    }
+
     private void startAnimation(){
-        final ValueAnimator animator = getAnimator();
+        ValueAnimator animator = getAnimator();
         animator.setInterpolator(new AccelerateInterpolator());
         animator.setDuration(3000);
         animator.setRepeatCount(3);
@@ -73,8 +88,8 @@ public class WelcomeActivityAnimView extends View{
                 super.onAnimationEnd(animation);
                 //第一次动画结束，计数加一
                 count ++;
-                WelcomeActivityAnimView.super.draw(new Canvas());
-
+                //重新绘制
+                invalidate();
             }
         });
         animator.start();

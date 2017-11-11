@@ -1,5 +1,6 @@
 package com.lipeng.newapp.activity;
 
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,12 +41,12 @@ public class WelcomePage extends AppCompatActivity {
                 .setInterpolator(new BounceInterpolator())
                 .setDuration(2000)
                 .translationX(600)
-                .translationY(900);
+                .translationY(900);*/
 
-        ObjectAnimator animator = ObjectAnimator.ofFloat(mAnim, View.ALPHA, 600f, 900f);
-        animator.setDuration(2000)
-                .setInterpolator(new BounceInterpolator());
-        animator.setRepeatCount(-1);
-        animator.start();*/
+/*        ObjectAnimator animator1 = ObjectAnimator.ofFloat(mAnim, View.SCALE_X, 1f, 100f);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(mAnim, View.SCALE_Y, 1f, 100f);
+        AnimatorSet set = new AnimatorSet();
+        set.play(animator).with(animator1);
+        set.setDuration(10000).start();*/
     }
 }
