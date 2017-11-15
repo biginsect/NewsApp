@@ -42,12 +42,17 @@
 
     </LinearLayout>
 
-<Button
-    android:id="@+id/btn_login"
-    android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:text="@string/login"
-    android:textSize="25sp"
-    />
+
+
+        <Button
+            android:id="@+id/btn_login"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#C1FFC1"
+            android:text="@string/login"
+            android:textSize="25sp" />
+
+
+
 
 </LinearLayout>

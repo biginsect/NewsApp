@@ -1,5 +1,7 @@
 package com.lipeng.newapp.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -31,6 +33,9 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     private String mAccountFromEditText;
     private String mPasswordFromEditText;
 
+    //坐标点，x轴和y轴
+    private float mX,mY;
+
     //控件
     @BindView(R.id.edit_account) EditText mEditAccount;
     @BindView(R.id.edit_password) EditText mEditPassword;
@@ -56,14 +61,30 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_login:
-                login();
+                //获取坐标点
+                mX = v.getX();
+                mY = v.getY();
+                startAnimation();
                 break;
             default:
                 break;
         }
     }
 
-    private void login(){//对登录操作进行验证
+    private void startAnimation(){
+        mBtnLogin.animate()
+                .translationY(300)
+                .setDuration(1000)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        login(mX, mY);
+                    }
+                });
+    }
+
+    private void login(float x, float y){//对登录操作进行验证
         //获取EditText的账号和密码
         mAccountFromEditText = mEditAccount.getText().toString();
         mPasswordFromEditText = mEditPassword.getText().toString();
@@ -73,6 +94,9 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         }else if (mAccount.equals(mAccountFromEditText) && mPassword.equals(mPasswordFromEditText)){//账号密码都正确则跳转
             Intent intent = new Intent(LoginPageActivity.this, MainActivity.class);
             Toast.makeText(this, "Login successfully!", Toast.LENGTH_SHORT).show();
+            //传入坐标点
+            intent.putExtra("x", x);
+            intent.putExtra("y", y);
             startActivity(intent);
             finish();
         }else {

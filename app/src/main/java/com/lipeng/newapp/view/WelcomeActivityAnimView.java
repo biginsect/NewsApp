@@ -1,22 +1,15 @@
 package com.lipeng.newapp.view;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
+import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.ScaleAnimation;
 
 import com.lipeng.newapp.view.evaluator.PointEvaluator;
 
@@ -32,7 +25,6 @@ public class WelcomeActivityAnimView extends View{
     private Point currentPoint;
     //画笔
     private Paint mPaint;
-    private int count = 1;
 
     public WelcomeActivityAnimView(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -42,20 +34,12 @@ public class WelcomeActivityAnimView extends View{
 
     @Override
     protected void onDraw(Canvas canvas) {//绘制
-        if (count % 2 != 0) {
-            if (currentPoint == null) {
+        if (currentPoint == null) {
                 currentPoint = new Point(RADIUS, RADIUS);
                 drawCircle(canvas);
                 startAnimation();
-            } else {
-                drawCircle(canvas);
-            }
-        }else {
-            //求出屏幕对角线的长度
-            float radius = getWidth()*getWidth()+getHeight()*getHeight();
-            //重新绘制
-            canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), 100,mPaint);
-//            startScaleAnimation();
+        } else {
+            drawCircle(canvas);
         }
     }
 
@@ -65,37 +49,7 @@ public class WelcomeActivityAnimView extends View{
         canvas.drawCircle(x, y, RADIUS, mPaint);
     }
 
-    public void startScaleAnimation(){//缩放动画
-        ScaleAnimation animation = new ScaleAnimation(RADIUS, 50f, RADIUS, 50f, Animation.RELATIVE_TO_SELF,
-                0.5f,Animation.RELATIVE_TO_SELF, 0.5f);
-        animation.setDuration(1000);
-        animation.setFillAfter(true);
-        this.setAnimation(animation);
-        Log.d("111111111111111111","         -----");
-        startAnimation(animation);
-    }
-
     private void startAnimation(){
-        ValueAnimator animator = getAnimator();
-        animator.setInterpolator(new AccelerateInterpolator());
-        animator.setDuration(3000);
-        animator.setRepeatCount(3);
-        //反向
-        animator.setRepeatMode(ValueAnimator.REVERSE);
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                //第一次动画结束，计数加一
-                count ++;
-                //重新绘制
-                invalidate();
-            }
-        });
-        animator.start();
-    }
-
-    private ValueAnimator getAnimator(){
         //动画起始坐标
         Point startPoint = new Point(RADIUS, RADIUS);
         //动画结束坐标
@@ -110,6 +64,12 @@ public class WelcomeActivityAnimView extends View{
                 invalidate();
             }
         });
-        return animator;
+        animator.setInterpolator(new AccelerateInterpolator());
+        animator.setDuration(2000);
+        animator.setRepeatCount(-1);
+        //反向
+        animator.setRepeatMode(ValueAnimator.REVERSE);
+        animator.start();
     }
+
 }

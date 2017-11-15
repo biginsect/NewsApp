@@ -1,6 +1,8 @@
 package com.lipeng.newapp.activity;
 
+import android.animation.Animator;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +11,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateInterpolator;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.lipeng.myapplication.R;
@@ -38,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
     private final static String TAG = "MainActivity";
     @BindView(R.id.rv_news) RecyclerView mRecyclerView;
     @BindView(R.id.banner_top_stories)  Banner mBanner;
+    @BindView(R.id.ll_root)
+    LinearLayout root;
 
     private MyAdapter mRecyclerAdapter;
     private NewsDatabase mDatabase;
@@ -60,7 +67,18 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
 
     private void init(){//初始化控件，加载数据等
         ButterKnife.bind(this);
-        //存放news的List
+        //执行揭露动画
+        root.post(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                    float x = getIntent().getFloatExtra("x", 0f);
+                    float y = getIntent().getFloatExtra("y", 0f);
+                    Animator animator = createRevealAnimator(x, y);
+                    animator.start();
+                }
+            }
+        });
         mDatabase = NewsDatabase.getInstance(this);
 
         //请求数据,完成后将数据存储到数据库中
@@ -109,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
                 //限制只放入五张轮播图
                 for (int i = storiesList.size() - 1; i >= 0 && i != storiesList.size() - 6; i--){
                     tmpImageUrls.add(storiesList.get(i).getStoryImageUrl());
-                    Log.d(TAG, "---------" + storiesList.get(i).getStoryImageUrl());
+//                    Log.d(TAG, "---------" + storiesList.get(i).getStoryImageUrl());
                     tmpTitles.add(storiesList.get(i).getStoryTitle());
                 }
 
@@ -122,6 +140,19 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
         }
     };
 
+    private Animator createRevealAnimator(float x, float y){
+        float startRadius =  0;
+        //获取根布局的对角线长度
+        float endRadius = (float)Math.hypot(root.getHeight(), root.getWidth());
+
+        Animator animator = ViewAnimationUtils.createCircularReveal(
+                root, (int)x, (int)y,
+                startRadius, endRadius
+        );
+        animator.setDuration(1000)
+                .setInterpolator(new AccelerateInterpolator());
+        return animator;
+    }
 
     @Override
     public void response() {

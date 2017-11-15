@@ -7,6 +7,14 @@
     android:orientation="vertical"
     tools:context="com.lipeng.newapp.activity.MainActivity">
 
+    <LinearLayout
+        android:id="@+id/ll_root"
+        android:orientation="vertical"
+        android:background="#C1FFC1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
     <com.youth.banner.Banner
         android:id="@+id/banner_top_stories"
         android:layout_width="match_parent"
@@ -24,5 +32,6 @@
         android:id="@+id/rv_news"
         android:layout_height="match_parent"
         android:layout_width="match_parent"/>
+    </LinearLayout>
 
 </LinearLayout>

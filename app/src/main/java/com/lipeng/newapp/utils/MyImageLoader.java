@@ -20,7 +20,6 @@ public class MyImageLoader extends ImageLoader {
 
     @Override
     public ImageView createImageView(Context context) {
-        SimpleDraweeView draweeView = new SimpleDraweeView(context);
-        return draweeView;
+        return new SimpleDraweeView(context);
     }
 }
