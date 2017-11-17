@@ -27,7 +27,6 @@ public class WelcomePage extends AppCompatActivity {
         //第二个自定义view需要延迟播放
         WelcomeActivityAnimView animView1 = new WelcomeActivityAnimView(this);
         animView1.setLayoutParams(params);
-        animView1.setDelay(1000);
 
         ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.activity_welcome_page, null);
         viewGroup.setBackgroundColor(Color.parseColor("#8B8878"));
