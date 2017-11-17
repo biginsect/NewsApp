@@ -1,14 +1,13 @@
 package com.lipeng.newapp.view;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
 
 import com.lipeng.newapp.view.evaluator.PointEvaluator;
@@ -25,15 +24,22 @@ public class WelcomeActivityAnimView extends View{
     private Point currentPoint;
     //画笔
     private Paint mPaint;
+    //延迟播放动画的时间
+    private long delay;
+
+    public WelcomeActivityAnimView(Context context){//不能直接调用super(context)，否则canvas未初始化报空指针
+        this(context, null);
+    }
 
     public WelcomeActivityAnimView(Context context, AttributeSet attrs){
         super(context, attrs);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setColor(Color.parseColor("#551A8B"));
+        mPaint.setColor(Color.WHITE);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {//绘制
+        Log.d("log", "onDraw");
         if (currentPoint == null) {
                 currentPoint = new Point(RADIUS, RADIUS);
                 drawCircle(canvas);
@@ -41,6 +47,10 @@ public class WelcomeActivityAnimView extends View{
         } else {
             drawCircle(canvas);
         }
+    }
+
+    public void setDelay(long delay){//设置动画延迟播放
+        this.delay = delay;
     }
 
     private void drawCircle(Canvas canvas){
@@ -66,10 +76,31 @@ public class WelcomeActivityAnimView extends View{
         });
         animator.setInterpolator(new AccelerateInterpolator());
         animator.setDuration(2000);
-        animator.setRepeatCount(-1);
+        if (delay != 0L){
+            animator.setStartDelay(delay);
+            Log.d("MMMMM", delay + "");
+        }
+//        animator.setRepeatCount(-1);
         //反向
         animator.setRepeatMode(ValueAnimator.REVERSE);
         animator.start();
     }
 
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        Log.d("log", "onLayout");
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        Log.d("log","onWindowFocusChange" + " " + hasWindowFocus );
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Log.d("log", "onMeasure");
+    }
 }

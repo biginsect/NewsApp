@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
 
     private void init(){//初始化控件，加载数据等
         ButterKnife.bind(this);
-        //执行揭露动画
+        //执行揭露动画,尽量使用post方法，handler有可能会产生leak
         root.post(new Runnable() {
             @Override
             public void run() {
@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements RequestCompleteCa
                 List<TopStories> storiesList = mDatabase.loadStories();
                 //限制只放入五张轮播图
                 for (int i = storiesList.size() - 1; i >= 0 && i != storiesList.size() - 6; i--){
+                    //获取图片url和title
                     tmpImageUrls.add(storiesList.get(i).getStoryImageUrl());
 //                    Log.d(TAG, "---------" + storiesList.get(i).getStoryImageUrl());
                     tmpTitles.add(storiesList.get(i).getStoryTitle());
